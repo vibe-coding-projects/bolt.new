@@ -1,4 +1,3 @@
-import type { Message } from 'ai';
 import React, { type RefCallback } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
@@ -10,6 +9,8 @@ import { SendButton } from './SendButton.client';
 
 import styles from './BaseChat.module.scss';
 
+type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string };
+
 interface BaseChatProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement> | undefined;
   messageRef?: RefCallback<HTMLDivElement> | undefined;
@@ -17,7 +18,7 @@ interface BaseChatProps {
   showChat?: boolean;
   chatStarted?: boolean;
   isStreaming?: boolean;
-  messages?: Message[];
+  messages?: any[];
   enhancingPrompt?: boolean;
   promptEnhanced?: boolean;
   input?: string;
@@ -59,6 +60,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
   ) => {
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
 
+    // Filter messages to ChatMessage[]
+    const filteredMessages: ChatMessage[] = (messages || []).filter(
+      (m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string'
+    );
+
     return (
       <div
         ref={ref}
@@ -92,7 +98,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     <Messages
                       ref={messageRef}
                       className="flex flex-col w-full flex-1 max-w-chat px-4 pb-6 mx-auto z-1"
-                      messages={messages}
+                      messages={filteredMessages}
                       isStreaming={isStreaming}
                     />
                   ) : null;

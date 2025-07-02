@@ -12,9 +12,9 @@ interface ToolResult<Name extends string, Args, Result> {
 }
 
 interface Message {
+  id: string;
   role: 'user' | 'assistant';
   content: string;
-  toolInvocations?: ToolResult<string, unknown, unknown>[];
 }
 
 export type Messages = Message[];

@@ -1,6 +1,7 @@
-import type { Message } from 'ai';
 import { createScopedLogger } from '~/utils/logger';
 import type { ChatHistoryItem } from './useChatHistory';
+
+type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string };
 
 const logger = createScopedLogger('ChatHistory');
 
@@ -44,7 +45,7 @@ export async function getAll(db: IDBDatabase): Promise<ChatHistoryItem[]> {
 export async function setMessages(
   db: IDBDatabase,
   id: string,
-  messages: Message[],
+  messages: ChatMessage[],
   urlId?: string,
   description?: string,
 ): Promise<void> {

@@ -1,5 +1,4 @@
 import { useStore } from '@nanostores/react';
-import type { Message } from 'ai';
 import { useChat } from 'ai/react';
 import { useAnimate } from 'framer-motion';
 import { memo, useEffect, useRef, useState } from 'react';
@@ -13,12 +12,25 @@ import { cubicEasingFn } from '~/utils/easings';
 import { createScopedLogger, renderLogger } from '~/utils/logger';
 import { BaseChat } from './BaseChat';
 
+type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string };
+
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
   exit: 'animated fadeOutRight',
 });
 
 const logger = createScopedLogger('Chat');
+
+// Utility to ensure only valid ChatMessage objects are used
+function toChatMessages(messages: any[]): ChatMessage[] {
+  return (messages || [])
+    .filter((m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+    .map((m, i) => ({
+      id: m.id || `${m.role}-${i}-${Date.now()}`,
+      role: m.role,
+      content: m.content,
+    }));
+}
 
 export function Chat() {
   renderLogger.trace('Chat');
@@ -27,7 +39,7 @@ export function Chat() {
 
   return (
     <>
-      {ready && <ChatImpl initialMessages={initialMessages} storeMessageHistory={storeMessageHistory} />}
+      {ready && <ChatImpl initialMessages={toChatMessages(initialMessages)} storeMessageHistory={storeMessageHistory} />}
       <ToastContainer
         closeButton={({ closeToast }) => {
           return (
@@ -60,8 +72,8 @@ export function Chat() {
 }
 
 interface ChatProps {
-  initialMessages: Message[];
-  storeMessageHistory: (messages: Message[]) => Promise<void>;
+  initialMessages: ChatMessage[];
+  storeMessageHistory: (messages: ChatMessage[]) => Promise<void>;
 }
 
 export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProps) => {
@@ -97,12 +109,22 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
   }, []);
 
   useEffect(() => {
-    parseMessages(messages, isLoading);
-
-    if (messages.length > initialMessages.length) {
-      storeMessageHistory(messages).catch((error) => toast.error(error.message));
-    }
+    // Only pass user/assistant messages to parseMessages
+    const chatMessages = messages
+      .filter((m) => m.role === 'user' || m.role === 'assistant')
+      .map((m) => ({ id: m.id, role: m.role as 'user' | 'assistant', content: m.content }));
+    parseMessages(chatMessages, isLoading);
   }, [messages, isLoading, parseMessages]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      // Only pass user/assistant messages to storeMessageHistory
+      const chatMessages = messages
+        .filter((m) => m.role === 'user' || m.role === 'assistant')
+        .map((m) => ({ id: m.id, role: m.role as 'user' | 'assistant', content: m.content }));
+      storeMessageHistory(chatMessages).catch((error) => toast.error(error.message));
+    }
+  }, [messages, isLoading, storeMessageHistory]);
 
   const scrollTextArea = () => {
     const textarea = textareaRef.current;
@@ -213,16 +235,15 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
       scrollRef={scrollRef}
       handleInputChange={handleInputChange}
       handleStop={abort}
-      messages={messages.map((message, i) => {
+      messages={toChatMessages(messages.map((message, i) => {
         if (message.role === 'user') {
           return message;
         }
-
         return {
           ...message,
           content: parsedMessages[i] || '',
         };
-      })}
+      }))}
       enhancePrompt={() => {
         enhancePrompt(input, (input) => {
           setInput(input);

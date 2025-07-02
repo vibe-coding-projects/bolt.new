@@ -1,5 +1,5 @@
 import { type ActionFunctionArgs } from '@remix-run/cloudflare';
-import { StreamingTextResponse, parseStreamPart } from 'ai';
+import { parseDataStreamPart } from 'ai';
 import { streamText } from '~/lib/.server/llm/stream-text';
 import { stripIndents } from '~/utils/stripIndent';
 
@@ -14,19 +14,20 @@ async function enhancerAction({ context, request }: ActionFunctionArgs) {
   const { message } = await request.json<{ message: string }>();
 
   try {
-    const result = await streamText(
+    const result = streamText(
       [
         {
+          id: Date.now().toString(),
           role: 'user',
           content: stripIndents`
-          I want you to improve the user prompt that is wrapped in \`<original_prompt>\` tags.
+            I want you to improve the user prompt that is wrapped in <original_prompt> tags.
 
-          IMPORTANT: Only respond with the improved prompt and nothing else!
+            IMPORTANT: Only respond with the improved prompt and nothing else!
 
-          <original_prompt>
-            ${message}
-          </original_prompt>
-        `,
+            <original_prompt>
+              ${message}
+            </original_prompt>
+          `,
         },
       ],
       context.cloudflare.env,
@@ -38,7 +39,7 @@ async function enhancerAction({ context, request }: ActionFunctionArgs) {
           .decode(chunk)
           .split('\n')
           .filter((line) => line !== '')
-          .map(parseStreamPart)
+          .map(parseDataStreamPart)
           .map((part) => part.value)
           .join('');
 
@@ -46,9 +47,14 @@ async function enhancerAction({ context, request }: ActionFunctionArgs) {
       },
     });
 
-    const transformedStream = result.toAIStream().pipeThrough(transformStream);
+    const transformedStream = result.toDataStream().pipeThrough(transformStream);
 
-    return new StreamingTextResponse(transformedStream);
+    return new Response(transformedStream, {
+      status: 200,
+      headers: {
+        'content-type': 'text/plain; charset=utf-8',
+      },
+    });
   } catch (error) {
     console.log(error);
 

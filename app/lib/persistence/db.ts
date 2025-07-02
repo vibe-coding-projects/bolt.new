@@ -1,5 +1,5 @@
-import { createScopedLogger } from '~/utils/logger';
 import type { ChatHistoryItem } from './useChatHistory';
+import { createScopedLogger } from '~/utils/logger';
 
 type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string };
 

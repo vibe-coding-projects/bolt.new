@@ -1,9 +1,9 @@
 import { useLoaderData, useNavigate } from '@remix-run/react';
-import { useState, useEffect } from 'react';
 import { atom } from 'nanostores';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { workbenchStore } from '~/lib/stores/workbench';
 import { getMessages, getNextId, getUrlId, openDatabase, setMessages } from './db';
+import { workbenchStore } from '~/lib/stores/workbench';
 
 type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string };
 
@@ -117,4 +117,15 @@ function navigateChat(nextId: string) {
   url.pathname = `/chat/${nextId}`;
 
   window.history.replaceState({}, '', url);
+}
+
+export async function updateChatDescription(newDescription: string) {
+  if (!db || !chatId.get()) return;
+  // Get current chat item
+  const item = await getMessages(db, chatId.get()!);
+  if (!item) return;
+  // Update description in DB
+  await setMessages(db, chatId.get()!, item.messages, item.urlId, newDescription);
+  // Update atom
+  description.set(newDescription);
 }

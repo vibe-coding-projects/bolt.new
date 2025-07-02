@@ -3,6 +3,7 @@ import { useChat } from 'ai/react';
 import { useAnimate } from 'framer-motion';
 import { memo, useEffect, useRef, useState } from 'react';
 import { cssTransition, toast, ToastContainer } from 'react-toastify';
+import { BaseChat } from './BaseChat';
 import { useMessageParser, usePromptEnhancer, useShortcuts, useSnapScroll } from '~/lib/hooks';
 import { useChatHistory } from '~/lib/persistence';
 import { chatStore } from '~/lib/stores/chat';
@@ -10,7 +11,6 @@ import { workbenchStore } from '~/lib/stores/workbench';
 import { fileModificationsToHTML } from '~/utils/diff';
 import { cubicEasingFn } from '~/utils/easings';
 import { createScopedLogger, renderLogger } from '~/utils/logger';
-import { BaseChat } from './BaseChat';
 
 type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string };
 
@@ -39,7 +39,9 @@ export function Chat() {
 
   return (
     <>
-      {ready && <ChatImpl initialMessages={toChatMessages(initialMessages)} storeMessageHistory={storeMessageHistory} />}
+      {ready && (
+        <ChatImpl initialMessages={toChatMessages(initialMessages)} storeMessageHistory={storeMessageHistory} />
+      )}
       <ToastContainer
         closeButton={({ closeToast }) => {
           return (
@@ -235,15 +237,18 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
       scrollRef={scrollRef}
       handleInputChange={handleInputChange}
       handleStop={abort}
-      messages={toChatMessages(messages.map((message, i) => {
-        if (message.role === 'user') {
-          return message;
-        }
-        return {
-          ...message,
-          content: parsedMessages[i] || '',
-        };
-      }))}
+      messages={toChatMessages(
+        messages.map((message, i) => {
+          if (message.role === 'user') {
+            return message;
+          }
+
+          return {
+            ...message,
+            content: parsedMessages[i] || '',
+          };
+        }),
+      )}
       enhancePrompt={() => {
         enhancePrompt(input, (input) => {
           setInput(input);

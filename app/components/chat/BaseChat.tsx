@@ -1,13 +1,12 @@
 import React, { type RefCallback } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
+import styles from './BaseChat.module.scss';
+import { Messages } from './Messages.client';
+import { SendButton } from './SendButton.client';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { IconButton } from '~/components/ui/IconButton';
 import { Workbench } from '~/components/workbench/Workbench.client';
 import { classNames } from '~/utils/classNames';
-import { Messages } from './Messages.client';
-import { SendButton } from './SendButton.client';
-
-import styles from './BaseChat.module.scss';
 
 type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string };
 
@@ -62,7 +61,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     // Filter messages to ChatMessage[]
     const filteredMessages: ChatMessage[] = (messages || []).filter(
-      (m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string'
+      (m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string',
     );
 
     return (

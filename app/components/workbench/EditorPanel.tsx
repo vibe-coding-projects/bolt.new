@@ -1,6 +1,9 @@
 import { useStore } from '@nanostores/react';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle, type ImperativePanelHandle } from 'react-resizable-panels';
+import { FileBreadcrumb } from './FileBreadcrumb';
+import { FileTree } from './FileTree';
+import { Terminal, type TerminalRef } from './terminal/Terminal';
 import {
   CodeMirrorEditor,
   type EditorDocument,
@@ -20,9 +23,6 @@ import { classNames } from '~/utils/classNames';
 import { WORK_DIR } from '~/utils/constants';
 import { renderLogger } from '~/utils/logger';
 import { isMobile } from '~/utils/mobile';
-import { FileBreadcrumb } from './FileBreadcrumb';
-import { FileTree } from './FileTree';
-import { Terminal, type TerminalRef } from './terminal/Terminal';
 
 interface EditorPanelProps {
   files?: FileMap;

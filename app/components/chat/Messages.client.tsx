@@ -1,7 +1,7 @@
 import React from 'react';
-import { classNames } from '~/utils/classNames';
 import { AssistantMessage } from './AssistantMessage';
 import { UserMessage } from './UserMessage';
+import { classNames } from '~/utils/classNames';
 
 type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string };
 

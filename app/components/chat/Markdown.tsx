@@ -1,12 +1,12 @@
 import { memo, useMemo } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import type { BundledLanguage } from 'shiki';
-import { createScopedLogger } from '~/utils/logger';
-import { rehypePlugins, remarkPlugins, allowedHTMLElements } from '~/utils/markdown';
 import { Artifact } from './Artifact';
 import { CodeBlock } from './CodeBlock';
 
 import styles from './Markdown.module.scss';
+import { createScopedLogger } from '~/utils/logger';
+import { rehypePlugins, remarkPlugins, allowedHTMLElements } from '~/utils/markdown';
 
 const logger = createScopedLogger('MarkdownComponent');
 
@@ -61,14 +61,15 @@ export const Markdown = memo(({ children, html = false, limitedMarkdown = false 
   }, []);
 
   return (
-    <ReactMarkdown
-      allowedElements={allowedHTMLElements}
-      className={styles.MarkdownContent}
-      components={components}
-      remarkPlugins={remarkPlugins(limitedMarkdown)}
-      rehypePlugins={rehypePlugins(html)}
-    >
-      {children}
-    </ReactMarkdown>
+    <div className={styles.MarkdownContent}>
+      <ReactMarkdown
+        allowedElements={allowedHTMLElements}
+        components={components}
+        remarkPlugins={remarkPlugins(limitedMarkdown)}
+        rehypePlugins={rehypePlugins(html)}
+      >
+        {children}
+      </ReactMarkdown>
+    </div>
   );
 });

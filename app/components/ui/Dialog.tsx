@@ -1,9 +1,9 @@
 import * as RadixDialog from '@radix-ui/react-dialog';
 import { motion, type Variants } from 'framer-motion';
 import React, { memo, type ReactNode } from 'react';
+import { IconButton } from './IconButton';
 import { classNames } from '~/utils/classNames';
 import { cubicEasingFn } from '~/utils/easings';
-import { IconButton } from './IconButton';
 
 export { Close as DialogClose, Root as DialogRoot } from '@radix-ui/react-dialog';
 
